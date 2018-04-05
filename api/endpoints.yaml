@@ -1,0 +1,489 @@
+openapi: "3.0.0"
+info:
+  title: http://kongeos-muenchen.de api
+  version: v1
+servers:
+  - url: http://kongeos-muenchen.de/
+  - url: http://kongeos-muc.de/
+
+paths:
+  /signup:
+    post:
+      summary: Registers a new user
+      tags:
+        - authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  required: true
+                  example: TestiTestmann123
+                password:
+                  type: string
+                  required: true
+                  example: '*******'
+      responses:
+        '200':
+          description: A new user got registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    example: TestiTestmann123
+                    description: The user name.
+        '409':
+          description: The user already exists.
+          content:
+            application/json:
+
+  /signin:
+    post:
+      tags:
+        - authentication
+      summary: Logs a user in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  required: true
+                  example: TestiTestmann123
+                password:
+                  type: string
+                  required: true
+                  example: '*******'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                  expiresIn:
+                    type: integer
+                  clientId:
+                    type: string
+
+  /signout:
+    post:
+      tags:
+        - authentication
+      summary: Logs a user out
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  required: true
+                  example: TestiTestmann123
+                clientId:
+                  type: string
+                  required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    example: TestiTestmann123
+
+  /token:
+    post:
+      tags:
+        - authentication
+      summary: Regenerates atoken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                refreshToken:
+                  type: string
+                clientId:
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  expiresIn:
+                    type: integer
+
+  /users:
+    get:
+      sumary: Returns a list of all user names.
+      tags:
+        - user
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user'
+
+
+  /users/{username}:
+    get:
+      sumary: Returns the information about a user
+      tags:
+        - user
+      parameters:
+        $ref: '#/parameters/schemas/userParam'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+    patch:
+      summary: Update the user profile
+      tags:
+        - user
+      parameters:
+        $ref: '#/parameters/schemas/userParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        '204':
+          description: Successfull patch of user profile
+  
+  /users/{username}/posts:
+    get:
+      summary: Returns all post that a user commited.
+      tags:
+        - user
+        - feed
+      parameters:
+        $ref: '#/parameters/schemas/userParam'
+        # - name: orderBy
+        #   type: srting
+        #   enum: [ latest, top, comment ]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/post'
+
+  /posts:
+    get:
+      summary: Returns an amount of posts
+      tags:
+        - feed
+      parameters:
+        - name: orderBy:
+          type: string
+          enum: [ latest, top, comment ]
+        
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/post'
+                
+    post:
+      summary: Creates a post
+      tags:
+        - feed
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/post'
+              
+      
+  /posts/{postId}:
+    get:
+      summary: Returns a post
+      tags:
+        - feed
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post'
+    delete:
+      summary: Hides a post from the feed
+      tags:
+        - feed
+      parameters:
+        - name: postId
+          type: string
+          in: path
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Post (postId) got deleted.
+
+  /events:
+    get:
+      summary: Returns a list of events
+      tags:
+        - events
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/event'
+    post:
+      summary: Creates a new event
+      tags:
+        - events
+      requestBody:
+        schema:
+          $ref: '#/components/schemas/event'
+  
+  /events/{postId}:
+    get:
+      
+      
+
+                  
+# Define reusable components                 
+components:
+  schemas:
+    event:
+      type: object
+      properties:
+        eventId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        location:
+          type: object
+          properties:
+            address:
+              type: string
+            room:
+              type: string
+            geolocation:
+              $ref: '#/components/schemas/geolocation'
+        time:
+          type: object
+          properties:
+            start:
+              type: integer
+              description: Unix timestamp
+            end:
+              type: integer
+              description: Unix timestamp
+        notification:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            time:
+              type: integer
+              description: Unix timestamp
+
+    post:
+      type: object
+      properties:
+        postId:
+          type: string
+        username:
+          type: string
+          example: TestiTestmann123
+        content:
+          type: object
+          properties:
+            text:
+              type: string
+            meta:
+              type: object
+              properties:
+                date:
+                  type: integer
+                image:
+                  type: string
+                  description: Base64 encoded image
+                geoloation:
+                  $ref: '#/components/schemas/geolocation'
+        votes:
+          $ref: '#/components/schemas/votes'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/comment'
+        isHidden:
+          type: boolean
+          default: false
+
+    comment:
+      type: object
+      properties:
+        text:
+          type: string
+        date:
+          type: integer
+        username:
+          type: string
+        votes:
+          $ref: '#/components/schemas/votes'
+
+    votes:
+      type: object
+      properties:
+        upvotes:
+          type: integer
+        downvotes:
+          type: integer
+
+    geolocation:
+      type: object
+      properties:
+        lat:
+          type: number
+        long:
+          type: number
+
+
+    # user_basic:
+    #   type: object
+    #   properties:
+    #     username:
+    #       type: string
+    #       example: TestiTestmann123
+    user:
+      type: object
+      properties:
+        username:
+          required: true
+          type: string
+          example: TestiTestmann123
+        gender:
+          type: string
+          enum: [female, male, transgender, unicorn, unknown]
+          example: unicorn
+        firstname:
+          type: string
+          example: Testi
+        lastname:
+          type: string
+          example: Testmann
+        email:
+          type: string
+          example: testmann@example.com
+        profilePicture:
+          type: string
+          description: Profile picture as base64 encoded string
+        motto:
+          type: string
+          example: Halt, Stopp! Suche Freunde!
+        university:
+          type: string
+          enum: [ Technische Universität München, Hochschule München, ... ]
+          example: Hochschule Müenchen
+        cityExcursion:
+          type: string
+          enum: [ Stadtrundgang, Brauereibesichtigung, ... ]
+          example: Stadtrundgang
+        professinalExcursion:
+          type: string
+          enum: [ Flughafen München, Trimble Terrasat, ... ]
+          example: Trimble Terrasat
+        role:
+          type: string
+          required: true
+          enum: [ admin, user ]
+          default: user
+        isBanned:
+          type: boolean
+          required: true
+          default: false
+
+# Define reusable parameters
+parameters:
+  schemas:
+    userParam:
+      - name: username
+        type: string
+        required: true
+        in: path
+      # - name: username
+      #     required: true
+      #     type: string
+      #     example: TestiTestmann123
+      # -name: gender
+      #     type: string
+      #     enum: [female, male, transgender, unicorn, unknown]
+      #     example: unicorn
+      #   firstname:
+      #     type: string
+      #     example: Testi
+      #   lastname:
+      #     type: string
+      #     example: Testmann
+      #   email:
+      #     type: string
+      #     example: testmann@example.com
+      #   profilePicture:
+      #     type: string
+      #     description: Profile picture as base64 encoded string
+      #   motto:
+      #     type: string
+      #     example: Halt, Stopp! Suche Freunde!
+      #   university:
+      #     type: string
+      #     enum: [ Technische Universität München, Hochschule München, ... ]
+      #     example: Hochschule Müenchen
+      #   cityExcursion:
+      #     type: string
+      #     enum: [ Stadtrundgang, Brauereibesichtigung, ... ]
+      #     example: Stadtrundgang
+      #   professinalExcursion:
+      #     type: string
+      #     enum: [ Flughafen München, Trimble Terrasat, ... ]
+      #     example: Trimble Terrasat
