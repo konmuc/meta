@@ -1,11 +1,10 @@
 openapi: "3.0.0"
 info:
-  title: http://kongeos-muenchen.de api
+  title: https://kongeos-muenchen.de API
   version: v1
 servers:
-  - url: http://kongeos-muenchen.de/
-  - url: http://kongeos-muc.de/
-
+  - url: https://app.kongeos-muenchen.de/v1/
+  - url: https://app.kongeos-muc.de/v1/
 paths:
   /signup:
     post:
@@ -18,16 +17,23 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - username
+                - password
               properties:
                 username:
                   type: string
-                  required: true
                   example: TestiTestmann123
                 password:
                   type: string
-                  required: true
                   example: '*******'
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
           description: A new user got registered
           content:
@@ -43,6 +49,9 @@ paths:
           description: The user already exists.
           content:
             application/json:
+              schema:
+                type: string
+        
 
   /signin:
     post:
@@ -55,17 +64,25 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - username
+                - password
               properties:
                 username:
                   type: string
-                  required: true
                   example: TestiTestmann123
                 password:
                   type: string
-                  required: true
                   example: '*******'
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
+          description: User got authenticated
           content:
             application/json:
               schema:
@@ -90,16 +107,24 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - username
+                - clientId
               properties:
                 username:
                   type: string
-                  required: true
                   example: TestiTestmann123
                 clientId:
                   type: string
-                  required: true
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
+          description: User got signed out
           content:
             application/json:
               schema:
@@ -127,7 +152,14 @@ paths:
                 clientId:
                   type: string
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
+          description: Got new token
           content:
             application/json:
               schema:
@@ -140,11 +172,18 @@ paths:
 
   /users:
     get:
-      sumary: Returns a list of all user names.
+      summary: Returns a list of all user names.
       tags:
         - user
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
+          description: Userlist
           content:
             application/json:
               schema:
@@ -155,13 +194,20 @@ paths:
 
   /users/{username}:
     get:
-      sumary: Returns the information about a user
+      summary: Returns the information about a user
       tags:
         - user
       parameters:
-        $ref: '#/parameters/schemas/userParam'
+        - $ref: '#/components/parameters/userParam'
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
+          description: Get Userdata
           content:
             application/json:
               schema:
@@ -171,7 +217,7 @@ paths:
       tags:
         - user
       parameters:
-        $ref: '#/parameters/schemas/userParam'
+        - $ref: '#/components/parameters/userParam'
       requestBody:
         required: true
         content:
@@ -179,6 +225,12 @@ paths:
             schema:
               $ref: '#/components/schemas/user'
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '204':
           description: Successfull patch of user profile
   
@@ -189,12 +241,16 @@ paths:
         - user
         - feed
       parameters:
-        $ref: '#/parameters/schemas/userParam'
-        # - name: orderBy
-        #   type: srting
-        #   enum: [ latest, top, comment ]
+        - $ref: '#/components/parameters/userParam'
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
+          description: Get all posts of user
           content:
             application/json:
               schema:
@@ -208,12 +264,21 @@ paths:
       tags:
         - feed
       parameters:
-        - name: orderBy:
-          type: string
-          enum: [ latest, top, comment ]
+        - name: orderBy
+          in: query
+          schema:
+            type: string
+            enum: [ latest, top, comment ]
         
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
+          description: got latests posts
           content:
             application/json:
               schema:
@@ -230,15 +295,41 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/post'
-              
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '200':
+          description: post created
+          content:
+            application/json:
+              schema:
+                description: postid
+                type: string
       
   /posts/{postId}:
     get:
       summary: Returns a post
       tags:
         - feed
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
+          description: get specific post
           content:
             application/json:
               schema:
@@ -249,10 +340,20 @@ paths:
         - feed
       parameters:
         - name: postId
-          type: string
           in: path
+          required: true
+          schema:
+            type: string
+            
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
+          description: deleted post successfully
           content:
             application/json:
               schema:
@@ -268,7 +369,14 @@ paths:
       tags:
         - events
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '200':
+          description: get all events
           content:
             application/json:
               schema:
@@ -280,18 +388,95 @@ paths:
       tags:
         - events
       requestBody:
-        schema:
-          $ref: '#/components/schemas/event'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/event'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '200':
+          description: successfully created event
+          content:
+            application/json:
+              schema:
+                type: string
+                example: EventID
+          
   
-  /events/{postId}:
+  /events/{eventId}:
     get:
-      
-      
+      summary: Returns specific event
+      tags:
+        - events
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '200':
+          description: got specific event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/event'
+    delete:
+      summary: Deletes specific event by id
+      tags:
+        - events
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '200':
+          description: deleted specific event
+          content:
+            application/json:
+              schema:
+                type: string
+                example: successfully deleted event {eventId}
+          
 
                   
 # Define reusable components                 
 components:
+
   schemas:
+  
+    error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        stacktrace:
+          type: object
+  
     event:
       type: object
       properties:
@@ -389,18 +574,14 @@ components:
         long:
           type: number
 
-
-    # user_basic:
-    #   type: object
-    #   properties:
-    #     username:
-    #       type: string
-    #       example: TestiTestmann123
     user:
       type: object
+      required:
+        - username
+        - role
+        - isBanned
       properties:
         username:
-          required: true
           type: string
           example: TestiTestmann123
         gender:
@@ -436,54 +617,18 @@ components:
           example: Trimble Terrasat
         role:
           type: string
-          required: true
           enum: [ admin, user ]
           default: user
         isBanned:
           type: boolean
-          required: true
           default: false
 
-# Define reusable parameters
-parameters:
-  schemas:
+  # Define reusable parameters
+  parameters:
     userParam:
-      - name: username
+      in: path
+      name: username
+      required: true
+      schema:
         type: string
-        required: true
-        in: path
-      # - name: username
-      #     required: true
-      #     type: string
-      #     example: TestiTestmann123
-      # -name: gender
-      #     type: string
-      #     enum: [female, male, transgender, unicorn, unknown]
-      #     example: unicorn
-      #   firstname:
-      #     type: string
-      #     example: Testi
-      #   lastname:
-      #     type: string
-      #     example: Testmann
-      #   email:
-      #     type: string
-      #     example: testmann@example.com
-      #   profilePicture:
-      #     type: string
-      #     description: Profile picture as base64 encoded string
-      #   motto:
-      #     type: string
-      #     example: Halt, Stopp! Suche Freunde!
-      #   university:
-      #     type: string
-      #     enum: [ Technische Universität München, Hochschule München, ... ]
-      #     example: Hochschule Müenchen
-      #   cityExcursion:
-      #     type: string
-      #     enum: [ Stadtrundgang, Brauereibesichtigung, ... ]
-      #     example: Stadtrundgang
-      #   professinalExcursion:
-      #     type: string
-      #     enum: [ Flughafen München, Trimble Terrasat, ... ]
-      #     example: Trimble Terrasat
+      description: this is the username
