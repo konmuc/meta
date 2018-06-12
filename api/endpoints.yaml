@@ -432,6 +432,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/event'
+    patch:
+      summary: Update the event
+      tags:
+        - events
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/event'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '204':
+          description: Successfull patch the event
     delete:
       summary: Deletes specific event by id
       tags:
