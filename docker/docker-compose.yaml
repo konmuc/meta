@@ -1,0 +1,22 @@
+version: '3'
+services:
+  kongeos-mongo:
+    image: mongo:latest
+    ports: 
+      - 27017:27017
+  kongeos-core:
+    build: ../../core
+    volumes: 
+      - ../../core:/usr/src/app
+    ports:
+      - 8088:8088
+    depends_on:
+      - kongeos-mongo
+  kongeos-prototype:
+    build: ../../web-app-prototype
+    volumes: 
+      - ../../web-app-prototype:/usr/src/app
+    ports:
+      - 8080:8080
+    depends_on:
+      - kongeos-core
